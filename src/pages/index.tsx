@@ -14,6 +14,7 @@ import {
   ConversationHeader,
   TypingIndicator,
 } from "@chatscope/chat-ui-kit-react";
+import CodeEditor from "react-textarea-code-editor";
 
 import styles from "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import { useChannel } from "@ably-labs/react-hooks";
@@ -57,6 +58,11 @@ const updateChatbotMessage = (
           date: new Date(),
         },
       ];
+};
+
+const parseMessage = (message: string) => {
+  const parts = message.split('[[[').map(part => part.split(']]]'));
+  return parts.flat();
 };
 
 export default function Home() {
@@ -148,6 +154,7 @@ export default function Home() {
                 }
               >
                 {conversation.map((entry, index) => {
+                  const messageParts = parseMessage(entry.message);
                   return (
                     <Message
                       key={index}
@@ -160,13 +167,24 @@ export default function Home() {
                           entry.speaker === "bot" ? "incoming" : "outgoing",
                       }}
                     >
-                      <Message.CustomContent>
-                        <ReactMarkdown
-                          remarkPlugins={[remarkMath, rehypeKatex]}
-                        >
-                          {entry.message}
-                        </ReactMarkdown>
-                      </Message.CustomContent>
+                      {messageParts.map((part, index) =>
+                        index % 2 === 0 ? (
+                          <Message.CustomContent key={index}>
+                            <ReactMarkdown
+                              remarkPlugins={[remarkMath, rehypeKatex]}
+                            >
+                              {part}
+                            </ReactMarkdown>
+                          </Message.CustomContent>
+                        ) : (
+                          <CodeEditor
+                            key={index}
+                            language="javascript"
+                            readOnly
+                            value={part}
+                          />
+                        )
+                      )}
                       <Message.Footer
                         sentTime={timeago.format(entry.date)}
                         sender={entry.speaker === "bot" ? "tangie" : "You"}

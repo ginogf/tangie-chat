@@ -109,7 +109,7 @@ const handleRequest = async ({ prompt, userId }: { prompt: string, userId: strin
     const chat = new ChatOpenAI({
       streaming: true,
       verbose: true,
-      modelName: "gpt-3.5-turbo",
+      modelName: "gpt-4",
       callbackManager: CallbackManager.fromHandlers({
         async handleLLMNewToken(token) {
           channel.publish({
